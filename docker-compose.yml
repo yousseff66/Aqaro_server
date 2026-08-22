@@ -1,0 +1,11 @@
+services:
+  sakan-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sakan-api
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
