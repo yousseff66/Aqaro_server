@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UsersController } from './users.controller';
@@ -22,7 +22,7 @@ import { PaymentsModule } from '../payments/payments.module';
     PropertiesModule,
     FavoritesModule,
     ReviewsModule,
-    NotificationsModule,
+    forwardRef(() => NotificationsModule),
     ReportsModule,
     PaymentsModule,
   ],

@@ -39,4 +39,26 @@ export class MailService {
       html: `<p>Your password reset code is: <strong>${code}</strong></p><p>This code expires in 15 minutes.</p>`,
     });
   }
+  async sendSupportEmail(userEmail: string, userName: string, subject: string, message: string, adminEmail: string) {
+    if (!this.transporter) {
+      this.logger.warn(
+        `SMTP not configured. Support message from ${userEmail}: ${message}`,
+      );
+      return;
+    }
+
+    await this.transporter.sendMail({
+      from: process.env.MAIL_FROM || 'no-reply@sakan.app',
+      to: adminEmail,
+      subject: `[Support Request] ${subject}`,
+      html: `
+        <h2>New Support Request</h2>
+        <p><strong>From:</strong> ${userName} (${userEmail})</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <hr>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `,
+    });
+  }
 }

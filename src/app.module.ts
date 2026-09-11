@@ -20,6 +20,7 @@ import { PlatformSettingsModule } from './platform-settings/platform-settings.mo
 import { ReviewsModule } from './reviews/reviews.module';
 import { ReportsModule } from './reports/reports.module';
 import { PaymentsModule } from './payments/payments.module';
+import { SupportModule } from './support/support.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -67,6 +68,8 @@ import { AppController } from './app.controller';
     ReportsModule,
 
     PaymentsModule,
+
+    SupportModule,
   ],
 
   controllers: [AppController],

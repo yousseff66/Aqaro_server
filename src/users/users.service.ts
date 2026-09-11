@@ -209,25 +209,17 @@ export class UsersService {
   }
 
   async deleteUser(id: string) {
-    // 1. Delete all properties and their images from Cloudinary
-    await this.propertiesService.deleteAllUserProperties(id);
+    // Run all deletions concurrently for much faster performance
+    await Promise.all([
+      this.propertiesService.deleteAllUserProperties(id),
+      this.favoritesService.deleteUserFavorites(id),
+      this.reviewsService.deleteUserReviews(id),
+      this.notificationsService.deleteUserNotifications(id),
+      this.reportsService.deleteUserReports(id),
+      this.paymentsService.deleteUserPayments(id),
+    ]);
 
-    // 2. Delete all favorites
-    await this.favoritesService.deleteUserFavorites(id);
-
-    // 3. Delete all reviews (both as reviewer and reviewed)
-    await this.reviewsService.deleteUserReviews(id);
-
-    // 4. Delete all notifications
-    await this.notificationsService.deleteUserNotifications(id);
-
-    // 5. Delete all reports
-    await this.reportsService.deleteUserReports(id);
-
-    // 6. Delete all payments and receipt images
-    await this.paymentsService.deleteUserPayments(id);
-
-    // 7. Delete the user itself
+    // Delete the user itself
     return this.userModel.findByIdAndDelete(id);
   }
 }

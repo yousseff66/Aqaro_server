@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { NotificationsController } from './notifications.controller';
@@ -19,7 +19,7 @@ import {
         schema: NotificationSchema,
       },
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [
     NotificationsController,
