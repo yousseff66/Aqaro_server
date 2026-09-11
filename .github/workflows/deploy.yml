@@ -1,0 +1,37 @@
+name: Deploy Backend to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Tarball
+        run: tar -czf backend.tar.gz --exclude=".git" --exclude="node_modules" .
+
+      - name: Copy to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "backend.tar.gz"
+          target: "/var/www/aqaro"
+
+      - name: Extract and Run Docker Compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /var/www/aqaro
+            tar -xzf backend.tar.gz
+            rm backend.tar.gz
+            docker compose up --build -d
