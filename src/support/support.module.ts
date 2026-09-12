@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { SupportService } from './support.service';
 import { SupportController } from './support.controller';
-import { MailModule } from '../mail/mail.module';
-import { PlatformSettingsModule } from '../platform-settings/platform-settings.module';
+import { SupportMessage, SupportMessageSchema } from './schemas/support-message.schema';
 
 @Module({
-  imports: [MailModule, PlatformSettingsModule],
+  imports: [
+    MongooseModule.forFeature([{ name: SupportMessage.name, schema: SupportMessageSchema }]),
+  ],
   controllers: [SupportController],
   providers: [SupportService],
 })
