@@ -7,6 +7,7 @@ import { PlatformSettingsModule } from '../platform-settings/platform-settings.m
 import { PaymentsModule } from '../payments/payments.module';
 import { ReportsModule } from '../reports/reports.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { SupportModule } from '../support/support.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     PaymentsModule,
     ReportsModule,
     NotificationsModule,
+    SupportModule,
   ],
   controllers: [AdminController],
 })

@@ -10,5 +10,6 @@ import { SupportMessage, SupportMessageSchema } from './schemas/support-message.
   ],
   controllers: [SupportController],
   providers: [SupportService],
+  exports: [SupportService],
 })
 export class SupportModule {}

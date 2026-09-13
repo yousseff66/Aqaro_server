@@ -31,6 +31,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { ReportsService } from '../reports/reports.service';
 import { PushNotificationService } from '../notifications/push-notification.service';
 import { SendPushNotificationDto } from './dto/send-push-notification.dto';
+import { SupportService } from '../support/support.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,6 +44,7 @@ export class AdminController {
     private readonly paymentsService: PaymentsService,
     private readonly reportsService: ReportsService,
     private readonly pushNotificationService: PushNotificationService,
+    private readonly supportService: SupportService,
   ) {}
 
   @Get('test')
@@ -76,6 +78,18 @@ toggleFeatured(
 ) {
   return this.propertiesService.toggleFeatured(id);
 }
+@Get('support')
+@Roles('Admin')
+getSupportMessages() {
+  return this.supportService.getAllSupportMessages();
+}
+
+@Patch('support/:id/resolve')
+@Roles('Admin')
+resolveSupportMessage(@Param('id') id: string) {
+  return this.supportService.resolveMessage(id);
+}
+
 @Get('dashboard')
 @Roles('Admin')
 async dashboard(
