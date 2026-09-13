@@ -16,14 +16,14 @@ export class SupportController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('Admin')
   @Get('admin')
   async getAllMessages() {
     return this.supportService.getAllSupportMessages();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('Admin')
   @Patch('admin/:id/resolve')
   async resolveMessage(@Param('id') id: string) {
     return this.supportService.resolveMessage(id);
