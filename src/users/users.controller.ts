@@ -5,7 +5,9 @@ import {
   Delete,
   Patch,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { getAuth } from 'firebase-admin/auth';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -15,9 +17,7 @@ import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Patch('me/phone')
   @UseGuards(JwtAuthGuard)
@@ -29,6 +29,22 @@ export class UsersController {
 
     if (existing && existing._id.toString() !== user.userId) {
       throw new BadRequestException('Phone number already in use');
+    }
+
+    try {
+      const decodedToken = await getAuth().verifyIdToken(dto.firebaseIdToken);
+      const expectedPhone = dto.phone.startsWith('+2')
+        ? dto.phone
+        : `+2${dto.phone}`;
+      if (decodedToken.phone_number !== expectedPhone) {
+        throw new UnauthorizedException(
+          'Phone number mismatch with Firebase OTP',
+        );
+      }
+    } catch (error: any) {
+      throw new UnauthorizedException(
+        error.message || 'Invalid or expired Firebase OTP token',
+      );
     }
 
     return this.usersService.updatePhone(user.userId, dto.phone);

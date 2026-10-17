@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-export type NotificationDocument =
-  HydratedDocument<Notification>;
+export type NotificationDocument = HydratedDocument<Notification>;
 
 @Schema({
   timestamps: true,
@@ -48,10 +47,7 @@ export class Notification {
   isRead: boolean;
 }
 
-export const NotificationSchema =
-  SchemaFactory.createForClass(
-    Notification,
-  );
+export const NotificationSchema = SchemaFactory.createForClass(Notification);
 
 NotificationSchema.index({
   user: 1,

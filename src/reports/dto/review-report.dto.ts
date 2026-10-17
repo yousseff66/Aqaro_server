@@ -1,14 +1,7 @@
-import {
-  IsIn,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class ReviewReportDto {
-  @IsIn([
-    'Reviewed',
-    'Rejected',
-  ])
+  @IsIn(['Reviewed', 'Rejected'])
   status: string;
 
   @IsOptional()

@@ -1,8 +1,11 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsString, Matches, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @IsEmail()
-  email!: string;
+  @IsString()
+  @Matches(/^01[0125][0-9]{8}$/, {
+    message: 'Phone number must be a valid Egyptian number (e.g. 01012345678)',
+  })
+  phone!: string;
 
   @IsString()
   @MinLength(8)

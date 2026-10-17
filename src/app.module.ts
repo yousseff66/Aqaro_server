@@ -4,10 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {
-  ThrottlerGuard,
-  ThrottlerModule,
-} from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -31,12 +28,8 @@ import { AppController } from './app.controller';
 
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (
-        configService: ConfigService,
-      ) => ({
-        uri: configService.get<string>(
-          'MONGODB_URI',
-        ),
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
 

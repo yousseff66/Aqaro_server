@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 
 import { PlatformSettingsService } from './platform-settings.service';
 
@@ -16,9 +10,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller()
 export class PlatformSettingsController {
-  constructor(
-    private readonly settingsService: PlatformSettingsService,
-  ) {}
+  constructor(private readonly settingsService: PlatformSettingsService) {}
 
   @Get('settings')
   getSettings() {

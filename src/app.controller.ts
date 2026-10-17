@@ -4,9 +4,7 @@ import { Connection } from 'mongoose';
 
 @Controller()
 export class AppController {
-  constructor(
-    @InjectConnection() private readonly connection: Connection,
-  ) {}
+  constructor(@InjectConnection() private readonly connection: Connection) {}
 
   @Get()
   getHello(): string {

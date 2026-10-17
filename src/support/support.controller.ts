@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards, Request, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { SupportService } from './support.service';
 import { CreateSupportDto } from './dto/create-support.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -11,7 +20,10 @@ export class SupportController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async submitSupportRequest(@Request() req, @Body() createSupportDto: CreateSupportDto) {
+  async submitSupportRequest(
+    @Request() req,
+    @Body() createSupportDto: CreateSupportDto,
+  ) {
     return this.supportService.submitSupportRequest(req.user, createSupportDto);
   }
 

@@ -39,7 +39,13 @@ export class MailService {
       html: `<p>Your password reset code is: <strong>${code}</strong></p><p>This code expires in 15 minutes.</p>`,
     });
   }
-  async sendSupportEmail(userEmail: string, userName: string, subject: string, message: string, adminEmail: string) {
+  async sendSupportEmail(
+    userEmail: string,
+    userName: string,
+    subject: string,
+    message: string,
+    adminEmail: string,
+  ) {
     if (!this.transporter) {
       this.logger.warn(
         `SMTP not configured. Support message from ${userEmail}: ${message}`,

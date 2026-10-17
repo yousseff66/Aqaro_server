@@ -23,9 +23,7 @@ type AuthenticatedRequest = ExpressRequest & {
 @Controller('favorites')
 @UseGuards(JwtAuthGuard)
 export class FavoritesController {
-  constructor(
-    private readonly favoritesService: FavoritesService,
-  ) {}
+  constructor(private readonly favoritesService: FavoritesService) {}
 
   @Post(':propertyId')
   add(
@@ -33,10 +31,7 @@ export class FavoritesController {
     propertyId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.favoritesService.add(
-      req.user.userId,
-      propertyId,
-    );
+    return this.favoritesService.add(req.user.userId, propertyId);
   }
 
   @Delete(':propertyId')
@@ -45,37 +40,23 @@ export class FavoritesController {
     propertyId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.favoritesService.remove(
-      req.user.userId,
-      propertyId,
-    );
+    return this.favoritesService.remove(req.user.userId, propertyId);
   }
   @Get('count')
-count(
-  @Request() req: AuthenticatedRequest,
-) {
-  return this.favoritesService.count(
-    req.user.userId,
-  );
-}
+  count(@Request() req: AuthenticatedRequest) {
+    return this.favoritesService.count(req.user.userId);
+  }
   @Get('is-favorite/:propertyId')
-isFavorite(
-  @Param('propertyId', ObjectIdValidationPipe)
-  propertyId: string,
-  @Request() req: AuthenticatedRequest,
-) {
-  return this.favoritesService.isFavorite(
-    req.user.userId,
-    propertyId,
-  );
-}
-
-  @Get()
-  findMyFavorites(
+  isFavorite(
+    @Param('propertyId', ObjectIdValidationPipe)
+    propertyId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.favoritesService.findMyFavorites(
-      req.user.userId,
-    );
+    return this.favoritesService.isFavorite(req.user.userId, propertyId);
+  }
+
+  @Get()
+  findMyFavorites(@Request() req: AuthenticatedRequest) {
+    return this.favoritesService.findMyFavorites(req.user.userId);
   }
 }

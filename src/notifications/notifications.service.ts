@@ -33,62 +33,40 @@ export class NotificationsService {
       title,
       message,
       type,
-      property: propertyId
-        ? new Types.ObjectId(propertyId)
-        : undefined,
-      payment: paymentId
-        ? new Types.ObjectId(paymentId)
-        : undefined,
+      property: propertyId ? new Types.ObjectId(propertyId) : undefined,
+      payment: paymentId ? new Types.ObjectId(paymentId) : undefined,
     });
   }
 
-  async getMyNotifications(
-    userId: string,
-  ) {
+  async getMyNotifications(userId: string) {
     return this.notificationModel
       .find({
         user: new Types.ObjectId(userId),
       })
-      .populate(
-        'property',
-        'title images',
-      )
+      .populate('property', 'title images')
       .sort({
         createdAt: -1,
       });
   }
 
-  async getUnreadCount(
-    userId: string,
-  ) {
-    const count =
-      await this.notificationModel.countDocuments({
-        user: new Types.ObjectId(userId),
-        isRead: false,
-      });
+  async getUnreadCount(userId: string) {
+    const count = await this.notificationModel.countDocuments({
+      user: new Types.ObjectId(userId),
+      isRead: false,
+    });
 
     return { count };
   }
 
-  async markAsRead(
-    id: string,
-    userId: string,
-  ) {
-    const notification =
-      await this.notificationModel.findById(id);
+  async markAsRead(id: string, userId: string) {
+    const notification = await this.notificationModel.findById(id);
 
     if (!notification) {
-      throw new NotFoundException(
-        'Notification not found',
-      );
+      throw new NotFoundException('Notification not found');
     }
 
-    if (
-      notification.user.toString() !== userId
-    ) {
-      throw new ForbiddenException(
-        'Not allowed',
-      );
+    if (notification.user.toString() !== userId) {
+      throw new ForbiddenException('Not allowed');
     }
 
     notification.isRead = true;
@@ -96,14 +74,11 @@ export class NotificationsService {
     await notification.save();
 
     return {
-      message:
-        'Notification marked as read',
+      message: 'Notification marked as read',
     };
   }
 
-  async markAllAsRead(
-    userId: string,
-  ) {
+  async markAllAsRead(userId: string) {
     await this.notificationModel.updateMany(
       {
         user: new Types.ObjectId(userId),
@@ -115,37 +90,25 @@ export class NotificationsService {
     );
 
     return {
-      message:
-        'All notifications marked as read',
+      message: 'All notifications marked as read',
     };
   }
 
-  async remove(
-    id: string,
-    userId: string,
-  ) {
-    const notification =
-      await this.notificationModel.findById(id);
+  async remove(id: string, userId: string) {
+    const notification = await this.notificationModel.findById(id);
 
     if (!notification) {
-      throw new NotFoundException(
-        'Notification not found',
-      );
+      throw new NotFoundException('Notification not found');
     }
 
-    if (
-      notification.user.toString() !== userId
-    ) {
-      throw new ForbiddenException(
-        'Not allowed',
-      );
+    if (notification.user.toString() !== userId) {
+      throw new ForbiddenException('Not allowed');
     }
 
     await notification.deleteOne();
 
     return {
-      message:
-        'Notification deleted successfully',
+      message: 'Notification deleted successfully',
     };
   }
 

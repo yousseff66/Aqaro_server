@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -35,11 +40,7 @@ export class UsersService {
     return this.userModel.findById(id).select('-password');
   }
 
-  async setResetCode(
-    id: string,
-    code: string,
-    expires: Date,
-  ) {
+  async setResetCode(id: string, code: string, expires: Date) {
     return this.userModel.findByIdAndUpdate(id, {
       resetPasswordCode: code,
       resetPasswordExpires: expires,
@@ -56,11 +57,7 @@ export class UsersService {
 
   async updatePhone(id: string, phone: string) {
     return this.userModel
-      .findByIdAndUpdate(
-        id,
-        { phone },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { phone }, { new: true })
       .select('-password');
   }
 
@@ -87,11 +84,7 @@ export class UsersService {
       })
       .limit(limit);
   }
-  async findAll(
-    page = 1,
-    limit = 10,
-    search?: string,
-    ) {
+  async findAll(page = 1, limit = 10, search?: string) {
     const filter: any = {};
 
     if (search) {
@@ -163,7 +156,12 @@ export class UsersService {
     };
   }
 
-  async addFcmToken(userId: string, token: string, platform: string, deviceId?: string) {
+  async addFcmToken(
+    userId: string,
+    token: string,
+    platform: string,
+    deviceId?: string,
+  ) {
     await this.userModel.findByIdAndUpdate(userId, {
       $pull: { fcmTokens: { token } },
     });
@@ -187,7 +185,7 @@ export class UsersService {
   }
 
   async getFcmTokensByCategory(category: string): Promise<string[]> {
-    let filter: any = {};
+    const filter: any = {};
 
     if (category === 'new_users') {
       const sevenDaysAgo = new Date();
@@ -196,14 +194,20 @@ export class UsersService {
     }
 
     const users = await this.userModel.find(filter).select('fcmTokens');
-    const allTokens = users.flatMap((u) => (u.fcmTokens || []).map((t) => t.token));
+    const allTokens = users.flatMap((u) =>
+      (u.fcmTokens || []).map((t) => t.token),
+    );
 
     return [...new Set(allTokens)];
   }
 
   async getTokensByIds(ids: any[]): Promise<string[]> {
-    const users = await this.userModel.find({ _id: { $in: ids } }).select('fcmTokens');
-    const allTokens = users.flatMap((u) => (u.fcmTokens || []).map((t) => t.token));
+    const users = await this.userModel
+      .find({ _id: { $in: ids } })
+      .select('fcmTokens');
+    const allTokens = users.flatMap((u) =>
+      (u.fcmTokens || []).map((t) => t.token),
+    );
 
     return [...new Set(allTokens)];
   }

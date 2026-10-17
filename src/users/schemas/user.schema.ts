@@ -26,12 +26,14 @@ export class User {
   name!: string;
 
   @Prop({
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
     lowercase: true,
     trim: true,
+    default: null,
   })
-  email!: string;
+  email?: string | null;
 
   @Prop({
     enum: ['User', 'Admin'],
@@ -77,7 +79,3 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-
-
-

@@ -1,19 +1,11 @@
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import {
-  HydratedDocument,
-  Types,
-} from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 import { User } from '../../users/schemas/user.schema';
 import { Property } from '../../properties/schemas/property.schema';
 
-export type ReviewDocument =
-  HydratedDocument<Review>;
+export type ReviewDocument = HydratedDocument<Review>;
 
 @Schema({
   timestamps: true,
@@ -53,10 +45,7 @@ export class Review {
   comment: string;
 }
 
-export const ReviewSchema =
-  SchemaFactory.createForClass(
-    Review,
-  );
+export const ReviewSchema = SchemaFactory.createForClass(Review);
 
 ReviewSchema.index(
   {

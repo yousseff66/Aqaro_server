@@ -29,14 +29,9 @@ interface CurrentUserPayload {
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(
-    private readonly reviewsService: ReviewsService,
-  ) {}
+  constructor(private readonly reviewsService: ReviewsService) {}
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   create(
     @Body()
@@ -45,10 +40,7 @@ export class ReviewsController {
     @CurrentUser()
     user: CurrentUserPayload,
   ) {
-    return this.reviewsService.create(
-      dto,
-      user.userId,
-    );
+    return this.reviewsService.create(dto, user.userId);
   }
 
   @Get('user/:id')
@@ -56,9 +48,7 @@ export class ReviewsController {
     @Param('id')
     id: string,
   ) {
-    return this.reviewsService.getUserReviews(
-      id,
-    );
+    return this.reviewsService.getUserReviews(id);
   }
 
   @Get('user/:id/rating')
@@ -66,15 +56,10 @@ export class ReviewsController {
     @Param('id')
     id: string,
   ) {
-    return this.reviewsService.getAverageRating(
-      id,
-    );
+    return this.reviewsService.getAverageRating(id);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   update(
     @Param('id')
@@ -86,17 +71,10 @@ export class ReviewsController {
     @CurrentUser()
     user: CurrentUserPayload,
   ) {
-    return this.reviewsService.update(
-      id,
-      dto,
-      user.userId,
-    );
+    return this.reviewsService.update(id, dto, user.userId);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   remove(
     @Param('id')
@@ -105,24 +83,16 @@ export class ReviewsController {
     @CurrentUser()
     user: CurrentUserPayload,
   ) {
-    return this.reviewsService.remove(
-      id,
-      user.userId,
-    );
+    return this.reviewsService.remove(id, user.userId);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin')
   @Delete('admin/:id')
   adminDelete(
     @Param('id')
     id: string,
   ) {
-    return this.reviewsService.adminDelete(
-      id,
-    );
+    return this.reviewsService.adminDelete(id);
   }
 }

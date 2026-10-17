@@ -18,4 +18,5 @@ export class SupportMessage {
   status: string;
 }
 
-export const SupportMessageSchema = SchemaFactory.createForClass(SupportMessage);
+export const SupportMessageSchema =
+  SchemaFactory.createForClass(SupportMessage);

@@ -6,4 +6,7 @@ export class ChangePhoneDto {
     message: 'Phone number must be a valid Egyptian number',
   })
   phone!: string;
+
+  @IsString()
+  firebaseIdToken!: string;
 }

@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type PlatformSettingsDocument =
-  HydratedDocument<PlatformSettings>;
+export type PlatformSettingsDocument = HydratedDocument<PlatformSettings>;
 
 @Schema({ _id: false })
 class InstaPaySettings {
@@ -125,6 +124,4 @@ export class PlatformSettings {
 }
 
 export const PlatformSettingsSchema =
-  SchemaFactory.createForClass(
-    PlatformSettings,
-  );
+  SchemaFactory.createForClass(PlatformSettings);

@@ -7,15 +7,9 @@ import {
 
 import { InjectModel } from '@nestjs/mongoose';
 
-import {
-  Model,
-  Types,
-} from 'mongoose';
+import { Model, Types } from 'mongoose';
 
-import {
-  Report,
-  ReportDocument,
-} from './schemas/report.schema';
+import { Report, ReportDocument } from './schemas/report.schema';
 
 import {
   Property,
@@ -35,79 +29,51 @@ export class ReportsService {
     @InjectModel(Property.name)
     private readonly propertyModel: Model<PropertyDocument>,
     private readonly propertiesService: PropertiesService,
-
   ) {}
 
-  async create(
-    dto: CreateReportDto,
-    userId: string,
-  ) {
-    const property =
-      await this.propertyModel.findById(
-        dto.propertyId,
-      );
+  async create(dto: CreateReportDto, userId: string) {
+    const property = await this.propertyModel.findById(dto.propertyId);
 
     if (!property) {
-      throw new NotFoundException(
-        'Property not found',
-      );
+      throw new NotFoundException('Property not found');
     }
 
-    if (
-      property.owner.toString() === userId
-    ) {
-      throw new BadRequestException(
-        'You cannot report your own property',
-      );
+    if (property.owner.toString() === userId) {
+      throw new BadRequestException('You cannot report your own property');
     }
 
-    const existing =
-      await this.reportModel.findOne({
-        reporter: new Types.ObjectId(userId),
-        property: property._id,
-      });
+    const existing = await this.reportModel.findOne({
+      reporter: new Types.ObjectId(userId),
+      property: property._id,
+    });
 
     if (existing) {
-      throw new BadRequestException(
-        'You already reported this property',
-      );
+      throw new BadRequestException('You already reported this property');
     }
 
     return this.reportModel.create({
-      reporter:
-        new Types.ObjectId(userId),
+      reporter: new Types.ObjectId(userId),
 
-      property:
-        property._id,
+      property: property._id,
 
-      reason:
-        dto.reason,
+      reason: dto.reason,
 
-      description:
-        dto.description ?? '',
+      description: dto.description ?? '',
     });
   }
 
-  async myReports(
-    userId: string,
-  ) {
+  async myReports(userId: string) {
     return this.reportModel
       .find({
-        reporter:
-          new Types.ObjectId(userId),
+        reporter: new Types.ObjectId(userId),
       })
-      .populate(
-        'property',
-        'title city status',
-      )
+      .populate('property', 'title city status')
       .sort({
         createdAt: -1,
       });
   }
 
-  async adminReports(
-    status?: string,
-  ) {
+  async adminReports(status?: string) {
     const filter: any = {};
 
     if (status) {
@@ -116,23 +82,14 @@ export class ReportsService {
 
     return this.reportModel
       .find(filter)
-      .populate(
-        'reporter',
-        'name email',
-      )
-      .populate(
-        'property',
-        'title city owner',
-      )
+      .populate('reporter', 'name email')
+      .populate('property', 'title city owner')
       .sort({
         createdAt: -1,
       });
   }
 
-  async countActive(
-    startDate?: Date,
-    endDate?: Date,
-  ) {
+  async countActive(startDate?: Date, endDate?: Date) {
     const filter: any = {
       status: 'Pending',
     };
@@ -152,122 +109,73 @@ export class ReportsService {
     return this.reportModel.countDocuments(filter);
   }
 
-  async review(
-    reportId: string,
-    adminId: string,
-    dto: ReviewReportDto,
-  ) {
-    const report =
-      await this.reportModel.findById(
-        reportId,
-      );
+  async review(reportId: string, adminId: string, dto: ReviewReportDto) {
+    const report = await this.reportModel.findById(reportId);
 
     if (!report) {
-      throw new NotFoundException(
-        'Report not found',
-      );
+      throw new NotFoundException('Report not found');
     }
 
-    report.status =
-      dto.status;
+    report.status = dto.status;
 
-    report.reviewedBy =
-      new Types.ObjectId(adminId);
+    report.reviewedBy = new Types.ObjectId(adminId);
 
-    report.reviewNote =
-      dto.reviewNote ?? '';
+    report.reviewNote = dto.reviewNote ?? '';
 
     await report.save();
 
     return {
-      message:
-        'Report reviewed successfully',
+      message: 'Report reviewed successfully',
     };
   }
 
-  async remove(
-    reportId: string,
-    userId: string,
-  ) {
-    const report =
-      await this.reportModel.findById(
-        reportId,
-      );
+  async remove(reportId: string, userId: string) {
+    const report = await this.reportModel.findById(reportId);
 
     if (!report) {
-      throw new NotFoundException(
-        'Report not found',
-      );
+      throw new NotFoundException('Report not found');
     }
 
-    if (
-      report.reporter.toString() !==
-      userId
-    ) {
-      throw new ForbiddenException(
-        'Not allowed',
-      );
+    if (report.reporter.toString() !== userId) {
+      throw new ForbiddenException('Not allowed');
     }
 
-    await this.reportModel.findByIdAndDelete(
-      reportId,
-    );
+    await this.reportModel.findByIdAndDelete(reportId);
 
     return {
-      message:
-        'Report deleted successfully',
+      message: 'Report deleted successfully',
     };
   }
 
-  async adminDelete(
-    reportId: string,
-  ) {
-    const report =
-      await this.reportModel.findById(
-        reportId,
-      );
+  async adminDelete(reportId: string) {
+    const report = await this.reportModel.findById(reportId);
 
     if (!report) {
-      throw new NotFoundException(
-        'Report not found',
-      );
+      throw new NotFoundException('Report not found');
     }
 
-    await this.reportModel.findByIdAndDelete(
-      reportId,
-    );
+    await this.reportModel.findByIdAndDelete(reportId);
 
     return {
-      message:
-        'Report deleted successfully',
+      message: 'Report deleted successfully',
     };
   }
 
-  async deleteReportedProperty(
-    reportId: string,
-  ) {
-    const report =
-      await this.reportModel.findById(
-        reportId,
-      );
+  async deleteReportedProperty(reportId: string) {
+    const report = await this.reportModel.findById(reportId);
 
     if (!report) {
-      throw new NotFoundException(
-        'Report not found',
-      );
+      throw new NotFoundException('Report not found');
     }
 
-    await this.propertyModel.findByIdAndDelete(
-      report.property,
-    );
+    await this.propertyModel.findByIdAndDelete(report.property);
 
     report.status = 'Reviewed';
 
     await report.save();
 
     return {
-      message:
-        'Property deleted successfully',
+      message: 'Property deleted successfully',
     };
   }
 

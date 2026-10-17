@@ -29,56 +29,31 @@ interface CurrentUserPayload {
 
 @Controller('reports')
 export class ReportsController {
-  constructor(
-    private readonly reportsService: ReportsService,
-  ) {}
+  constructor(private readonly reportsService: ReportsService) {}
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   create(
     @Body() dto: CreateReportDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.reportsService.create(
-      dto,
-      user.userId,
-    );
+    return this.reportsService.create(dto, user.userId);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('my')
-  myReports(
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
-    return this.reportsService.myReports(
-      user.userId,
-    );
+  myReports(@CurrentUser() user: CurrentUserPayload) {
+    return this.reportsService.myReports(user.userId);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin')
   @Get()
-  adminReports(
-    @Query('status') status?: string,
-  ) {
-    return this.reportsService.adminReports(
-      status,
-    );
+  adminReports(@Query('status') status?: string) {
+    return this.reportsService.adminReports(status);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin')
   @Patch(':id')
   review(
@@ -86,53 +61,26 @@ export class ReportsController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() dto: ReviewReportDto,
   ) {
-    return this.reportsService.review(
-      id,
-      user.userId,
-      dto,
-    );
+    return this.reportsService.review(id, user.userId, dto);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
-    return this.reportsService.remove(
-      id,
-      user.userId,
-    );
+  remove(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.reportsService.remove(id, user.userId);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin')
   @Delete('admin/:id')
-  adminDelete(
-    @Param('id') id: string,
-  ) {
-    return this.reportsService.adminDelete(
-      id,
-    );
+  adminDelete(@Param('id') id: string) {
+    return this.reportsService.adminDelete(id);
   }
 
-  @UseGuards(
-    JwtAuthGuard,
-    RolesGuard,
-  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin')
   @Delete(':id/property')
-  deleteReportedProperty(
-    @Param('id') id: string,
-  ) {
-    return this.reportsService.deleteReportedProperty(
-      id,
-    );
+  deleteReportedProperty(@Param('id') id: string) {
+    return this.reportsService.deleteReportedProperty(id);
   }
 }

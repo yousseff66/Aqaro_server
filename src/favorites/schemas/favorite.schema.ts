@@ -22,8 +22,7 @@ export class Favorite {
   property!: Types.ObjectId;
 }
 
-export const FavoriteSchema =
-  SchemaFactory.createForClass(Favorite);
+export const FavoriteSchema = SchemaFactory.createForClass(Favorite);
 
 FavoriteSchema.index(
   {

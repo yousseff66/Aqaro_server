@@ -26,9 +26,7 @@ export class PlatformSettingsService {
     return settings;
   }
 
-  async update(
-    dto: UpdatePlatformSettingsDto,
-  ) {
+  async update(dto: UpdatePlatformSettingsDto) {
     let settings = await this.settingsModel.findOne();
 
     if (!settings) {
@@ -41,15 +39,15 @@ export class PlatformSettingsService {
   }
 
   async listingPrices() {
-  const settings = await this.getSettings();
+    const settings = await this.getSettings();
 
-  return {
-    normal: settings.normalListingPrice,
-    featuredPriceWeek: settings.featuredPriceWeek,
-    featuredPriceTwoWeeks: settings.featuredPriceTwoWeeks,
-    featuredPriceMonth: settings.featuredPriceMonth,
-  };
-}
+    return {
+      normal: settings.normalListingPrice,
+      featuredPriceWeek: settings.featuredPriceWeek,
+      featuredPriceTwoWeeks: settings.featuredPriceTwoWeeks,
+      featuredPriceMonth: settings.featuredPriceMonth,
+    };
+  }
 
   async listingDuration() {
     const settings = await this.getSettings();

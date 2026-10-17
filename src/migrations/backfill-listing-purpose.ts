@@ -17,17 +17,11 @@ async function backfillListingPurpose() {
   await mongoose.connect(mongoUri);
 
   try {
-    const propertyModel = mongoose.model(
-      Property.name,
-      PropertySchema,
-    );
+    const propertyModel = mongoose.model(Property.name, PropertySchema);
 
     const result = await propertyModel.updateMany(
       {
-        $or: [
-          { listingPurpose: { $exists: false } },
-          { listingPurpose: null },
-        ],
+        $or: [{ listingPurpose: { $exists: false } }, { listingPurpose: null }],
       },
       { $set: { listingPurpose: 'Rent' } },
     );

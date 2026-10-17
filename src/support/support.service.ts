@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateSupportDto } from './dto/create-support.dto';
-import { SupportMessage, SupportMessageDocument } from './schemas/support-message.schema';
+import {
+  SupportMessage,
+  SupportMessageDocument,
+} from './schemas/support-message.schema';
 
 @Injectable()
 export class SupportService {
   constructor(
-    @InjectModel(SupportMessage.name) private supportMessageModel: Model<SupportMessageDocument>,
+    @InjectModel(SupportMessage.name)
+    private supportMessageModel: Model<SupportMessageDocument>,
   ) {}
 
   async submitSupportRequest(user: any, createSupportDto: CreateSupportDto) {
@@ -16,7 +20,7 @@ export class SupportService {
       subject: createSupportDto.subject,
       message: createSupportDto.message,
     });
-    
+
     await newMessage.save();
 
     return { success: true, message: 'Support request sent successfully.' };
@@ -34,7 +38,7 @@ export class SupportService {
     const message = await this.supportMessageModel.findByIdAndUpdate(
       id,
       { status: 'resolved' },
-      { new: true }
+      { new: true },
     );
     if (!message) {
       throw new NotFoundException('Message not found');

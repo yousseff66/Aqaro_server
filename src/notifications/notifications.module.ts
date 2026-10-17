@@ -21,16 +21,8 @@ import {
     ]),
     forwardRef(() => UsersModule),
   ],
-  controllers: [
-    NotificationsController,
-  ],
-  providers: [
-    NotificationsService,
-    PushNotificationService,
-  ],
-  exports: [
-    NotificationsService,
-    PushNotificationService,
-  ],
+  controllers: [NotificationsController],
+  providers: [NotificationsService, PushNotificationService],
+  exports: [NotificationsService, PushNotificationService],
 })
 export class NotificationsModule {}

@@ -1,20 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {
-  Payment,
-  PaymentSchema,
-} from './schemas/payment.schema';
+import { Payment, PaymentSchema } from './schemas/payment.schema';
 
 import {
   Property,
   PropertySchema,
 } from '../properties/schemas/property.schema';
 
-import {
-  User,
-  UserSchema,
-} from '../users/schemas/user.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';

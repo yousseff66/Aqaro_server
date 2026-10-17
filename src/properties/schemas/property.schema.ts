@@ -1,17 +1,8 @@
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-  raw,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 
-import {
-  HydratedDocument,
-  Types,
-} from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
-export type PropertyDocument =
-  HydratedDocument<Property>;
+export type PropertyDocument = HydratedDocument<Property>;
 
 @Schema({
   timestamps: true,
@@ -208,10 +199,7 @@ export class Property {
   owner!: Types.ObjectId;
 }
 
-export const PropertySchema =
-  SchemaFactory.createForClass(
-    Property,
-  );
+export const PropertySchema = SchemaFactory.createForClass(Property);
 
 PropertySchema.virtual('isFeatured').get(function () {
   return this.listingType === 'Featured';

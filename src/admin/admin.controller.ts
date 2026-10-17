@@ -55,102 +55,93 @@ export class AdminController {
     };
   }
   @Get('properties/pending')
-@Roles('Admin')
-getPendingProperties() {
-  return this.propertiesService.getPendingProperties();
-}
-@Patch('properties/:id/status')
-@Roles('Admin')
-updateStatus(
-  @Param('id') id: string,
-  @Body() dto: UpdatePropertyStatusDto,
-) {
-  return this.propertiesService.updatePropertyStatus(
-    id,
-    dto.status,
-    dto.reviewNote,
-  );
-}
-@Patch('properties/:id/feature')
-@Roles('Admin')
-toggleFeatured(
-  @Param('id') id: string,
-) {
-  return this.propertiesService.toggleFeatured(id);
-}
-@Get('support')
-@Roles('Admin')
-getSupportMessages() {
-  return this.supportService.getAllSupportMessages();
-}
+  @Roles('Admin')
+  getPendingProperties() {
+    return this.propertiesService.getPendingProperties();
+  }
+  @Patch('properties/:id/status')
+  @Roles('Admin')
+  updateStatus(@Param('id') id: string, @Body() dto: UpdatePropertyStatusDto) {
+    return this.propertiesService.updatePropertyStatus(
+      id,
+      dto.status,
+      dto.reviewNote,
+    );
+  }
+  @Patch('properties/:id/feature')
+  @Roles('Admin')
+  toggleFeatured(@Param('id') id: string) {
+    return this.propertiesService.toggleFeatured(id);
+  }
+  @Get('support')
+  @Roles('Admin')
+  getSupportMessages() {
+    return this.supportService.getAllSupportMessages();
+  }
 
-@Patch('support/:id/resolve')
-@Roles('Admin')
-resolveSupportMessage(@Param('id') id: string) {
-  return this.supportService.resolveMessage(id);
-}
+  @Patch('support/:id/resolve')
+  @Roles('Admin')
+  resolveSupportMessage(@Param('id') id: string) {
+    return this.supportService.resolveMessage(id);
+  }
 
-@Get('dashboard')
-@Roles('Admin')
-async dashboard(
-  @Query('startDate') startDate?: string,
-  @Query('endDate') endDate?: string,
-) {
-  const start = startDate ? new Date(startDate) : undefined;
-  const end = endDate ? new Date(endDate) : undefined;
+  @Get('dashboard')
+  @Roles('Admin')
+  async dashboard(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
 
-  const [
-    propertyStats,
-    totalUsers,
-    totalAdmins,
-    latestUsers,
-    topCities,
-    topViewed,
-    latestProperties,
-    paymentStats,
-    activeReportsCount,
-  ] = await Promise.all([
-    this.propertiesService.getDashboardStats(start, end),
-    this.usersService.countUsers(),
-    this.usersService.countAdmins(),
-    this.usersService.latestUsers(),
-    this.propertiesService.getTopCities(),
-    this.propertiesService.getTopViewed(),
-    this.propertiesService.latestProperties(),
-    this.paymentsService.getDashboardStats(start, end),
-    this.reportsService.countActive(start, end),
-  ]);
+    const [
+      propertyStats,
+      totalUsers,
+      totalAdmins,
+      latestUsers,
+      topCities,
+      topViewed,
+      latestProperties,
+      paymentStats,
+      activeReportsCount,
+    ] = await Promise.all([
+      this.propertiesService.getDashboardStats(start, end),
+      this.usersService.countUsers(),
+      this.usersService.countAdmins(),
+      this.usersService.latestUsers(),
+      this.propertiesService.getTopCities(),
+      this.propertiesService.getTopViewed(),
+      this.propertiesService.latestProperties(),
+      this.paymentsService.getDashboardStats(start, end),
+      this.reportsService.countActive(start, end),
+    ]);
 
-  return {
-    users: {
-      total: totalUsers,
-      admins: totalAdmins,
-      latest: latestUsers,
-    },
-    properties: propertyStats,
-    payments: paymentStats,
-    activeReports: activeReportsCount,
-    topCities,
-    topViewed,
-    latestProperties,
-  };
-}
+    return {
+      users: {
+        total: totalUsers,
+        admins: totalAdmins,
+        latest: latestUsers,
+      },
+      properties: propertyStats,
+      payments: paymentStats,
+      activeReports: activeReportsCount,
+      topCities,
+      topViewed,
+      latestProperties,
+    };
+  }
 
-@Get('users')
-@Roles('Admin')
-getUsers(
-  @Query('page') page = '1',
-  @Query('limit') limit = '10',
-  @Query('search') search?: string,
-) {
-  return this.usersService.findAll(
-    Number(page),
-    Number(limit),
-    search,
-  );
-}
+  @Get('users')
+  @Roles('Admin')
+  getUsers(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findAll(Number(page), Number(limit), search);
+  }
 
-@Post('notifications/push')
+  @Post('notifications/push')
   @Roles('Admin')
   async sendPushNotification(@Body() dto: SendPushNotificationDto) {
     let tokens: string[] = [];
@@ -159,7 +150,8 @@ getUsers(
       const ownerIds = await this.propertiesService.getOwnerIdsByStatus();
       tokens = await this.usersService.getTokensByIds(ownerIds);
     } else if (dto.category === 'pending_payment') {
-      const ownerIds = await this.propertiesService.getOwnerIdsByStatus('PendingPayment');
+      const ownerIds =
+        await this.propertiesService.getOwnerIdsByStatus('PendingPayment');
       tokens = await this.usersService.getTokensByIds(ownerIds);
     } else {
       tokens = await this.usersService.getFcmTokensByCategory(dto.category);
@@ -178,267 +170,224 @@ getUsers(
   }
 
   @Get('settings')
-@Roles('Admin')
-getSettings() {
-  return this.platformSettingsService.getSettings();
-}
+  @Roles('Admin')
+  getSettings() {
+    return this.platformSettingsService.getSettings();
+  }
 
-@Patch('settings')
-@Roles('Admin')
-updateSettings(
-  @Body() dto: UpdatePlatformSettingsDto,
-) {
-  return this.platformSettingsService.update(dto);
-}
+  @Patch('settings')
+  @Roles('Admin')
+  updateSettings(@Body() dto: UpdatePlatformSettingsDto) {
+    return this.platformSettingsService.update(dto);
+  }
 
-@Delete('users/:id')
-@Roles('Admin')
-async deleteUser(
-  @Param('id') id: string,
-) {
-  const user =
-    await this.usersService.findById(id);
+  @Delete('users/:id')
+  @Roles('Admin')
+  async deleteUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
 
-  if (!user) {
-    throw new NotFoundException(
-      'User not found',
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === 'Admin') {
+      const admins = await this.usersService.countAdmins();
+
+      if (admins <= 1) {
+        throw new BadRequestException('Cannot delete the last admin');
+      }
+    }
+
+    // Delete all favorites
+    await this.favoritesService.deleteUserFavorites(id);
+
+    // Delete all properties + Cloudinary images
+    await this.propertiesService.deleteAllUserProperties(id);
+
+    // Delete user
+    await this.usersService.deleteUser(id);
+
+    await this.favoritesService.deletePropertyFavorites(id);
+
+    return {
+      message: 'User deleted successfully',
+    };
+  }
+
+  @Patch('users/:id/role')
+  @Roles('Admin')
+  async updateUserRole(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserRoleDto,
+  ) {
+    const user = await this.usersService.findById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === 'Admin' && dto.role === 'User') {
+      const admins = await this.usersService.countAdmins();
+
+      if (admins <= 1) {
+        throw new BadRequestException('Cannot change role of the last admin');
+      }
+    }
+
+    return this.usersService.updateRole(id, dto.role);
+  }
+
+  @Patch('users/:id/ban')
+  @Roles('Admin')
+  async toggleBanUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === 'Admin' && !user.isBanned) {
+      const admins = await this.usersService.countAdmins();
+
+      if (admins <= 1) {
+        throw new BadRequestException('Cannot ban the last admin');
+      }
+    }
+
+    return this.usersService.toggleBan(id);
+  }
+
+  @Get('dashboard/export')
+  @Roles('Admin')
+  async exportDashboard(@Res() res: Response) {
+    const [
+      propertyStats,
+      totalUsers,
+      totalAdmins,
+      latestUsers,
+      topCities,
+      topViewed,
+      latestProperties,
+    ] = await Promise.all([
+      this.propertiesService.getDashboardStats(),
+      this.usersService.countUsers(),
+      this.usersService.countAdmins(),
+      this.usersService.latestUsers(),
+      this.propertiesService.getTopCities(),
+      this.propertiesService.getTopViewed(),
+      this.propertiesService.latestProperties(),
+    ]);
+
+    const doc = new PDFDocument({
+      margin: 50,
+      size: 'A4',
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=Sakan_Dashboard_Report.pdf',
     );
-  }
 
-  if (user.role === 'Admin') {
-    const admins =
-      await this.usersService.countAdmins();
+    doc.pipe(res);
 
-    if (admins <= 1) {
-      throw new BadRequestException(
-        'Cannot delete the last admin',
-      );
-    }
-  }
+    // =========================
+    // TITLE
+    // =========================
 
-  // Delete all favorites
-  await this.favoritesService.deleteUserFavorites(id);
-
-  // Delete all properties + Cloudinary images
-  await this.propertiesService.deleteAllUserProperties(id);
-
-  // Delete user
-  await this.usersService.deleteUser(id);
-
-  await this.favoritesService.deletePropertyFavorites(id);
-
-  return {
-    message: 'User deleted successfully',
-  };
-}
-
-@Patch('users/:id/role')
-@Roles('Admin')
-async updateUserRole(
-  @Param('id') id: string,
-  @Body() dto: UpdateUserRoleDto,
-) {
-  const user = await this.usersService.findById(id);
-
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  if (user.role === 'Admin' && dto.role === 'User') {
-    const admins = await this.usersService.countAdmins();
-
-    if (admins <= 1) {
-      throw new BadRequestException(
-        'Cannot change role of the last admin',
-      );
-    }
-  }
-
-  return this.usersService.updateRole(id, dto.role);
-}
-
-@Patch('users/:id/ban')
-@Roles('Admin')
-async toggleBanUser(
-  @Param('id') id: string,
-) {
-  const user = await this.usersService.findById(id);
-
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  if (user.role === 'Admin' && !user.isBanned) {
-    const admins = await this.usersService.countAdmins();
-
-    if (admins <= 1) {
-      throw new BadRequestException(
-        'Cannot ban the last admin',
-      );
-    }
-  }
-
-  return this.usersService.toggleBan(id);
-}
-
-@Get('dashboard/export')
-@Roles('Admin')
-async exportDashboard(
-  @Res() res: Response,
-) {
-  const [
-    propertyStats,
-    totalUsers,
-    totalAdmins,
-    latestUsers,
-    topCities,
-    topViewed,
-    latestProperties,
-  ] = await Promise.all([
-    this.propertiesService.getDashboardStats(),
-    this.usersService.countUsers(),
-    this.usersService.countAdmins(),
-    this.usersService.latestUsers(),
-    this.propertiesService.getTopCities(),
-    this.propertiesService.getTopViewed(),
-    this.propertiesService.latestProperties(),
-  ]);
-
-  const doc = new PDFDocument({
-    margin: 50,
-    size: 'A4',
-  });
-
-  res.setHeader(
-    'Content-Type',
-    'application/pdf',
-  );
-
-  res.setHeader(
-    'Content-Disposition',
-    'attachment; filename=Sakan_Dashboard_Report.pdf',
-  );
-
-  doc.pipe(res);
-
-  // =========================
-  // TITLE
-  // =========================
-
-  doc
-    .fontSize(22)
-    .text('Sakan Dashboard Report', {
+    doc.fontSize(22).text('Sakan Dashboard Report', {
       align: 'center',
     });
 
-  doc.moveDown();
+    doc.moveDown();
 
-  doc
-    .fontSize(10)
-    .text(
-      `Generated: ${new Date().toLocaleString()}`,
-    );
+    doc.fontSize(10).text(`Generated: ${new Date().toLocaleString()}`);
 
-  doc.moveDown();
+    doc.moveDown();
 
-  // =========================
-  // USERS
-  // =========================
+    // =========================
+    // USERS
+    // =========================
 
-  doc
-    .fontSize(16)
-    .text('Users');
+    doc.fontSize(16).text('Users');
 
-  doc.fontSize(12);
+    doc.fontSize(12);
 
-  doc.text(`Total Users : ${totalUsers}`);
-  doc.text(`Admins      : ${totalAdmins}`);
+    doc.text(`Total Users : ${totalUsers}`);
+    doc.text(`Admins      : ${totalAdmins}`);
 
-  doc.moveDown();
+    doc.moveDown();
 
-  doc.text('Latest Users');
+    doc.text('Latest Users');
 
-  latestUsers.forEach((user: any) => {
-    doc.text(
-      `• ${user.name} (${user.email})`,
-    );
-  });
+    latestUsers.forEach((user: any) => {
+      doc.text(`• ${user.name} (${user.email})`);
+    });
 
-  doc.moveDown();
+    doc.moveDown();
 
-  // =========================
-  // PROPERTIES
-  // =========================
+    // =========================
+    // PROPERTIES
+    // =========================
 
-  doc
-    .fontSize(16)
-    .text('Properties');
+    doc.fontSize(16).text('Properties');
 
-  doc.fontSize(12);
+    doc.fontSize(12);
 
-  Object.entries(propertyStats).forEach(
-    ([key, value]) => {
+    Object.entries(propertyStats).forEach(([key, value]) => {
       doc.text(`${key}: ${value}`);
-    },
-  );
+    });
 
-  doc.moveDown();
+    doc.moveDown();
 
-  // =========================
-  // TOP CITIES
-  // =========================
+    // =========================
+    // TOP CITIES
+    // =========================
 
-  doc
-    .fontSize(16)
-    .text('Top Cities');
+    doc.fontSize(16).text('Top Cities');
 
-  topCities.forEach((city: any) => {
-    doc.text(
-      `• ${city.city} (${city.count})`,
-    );
-  });
+    topCities.forEach((city: any) => {
+      doc.text(`• ${city.city} (${city.count})`);
+    });
 
-  doc.moveDown();
+    doc.moveDown();
 
-  // =========================
-  // TOP VIEWED
-  // =========================
+    // =========================
+    // TOP VIEWED
+    // =========================
 
-  doc
-    .fontSize(16)
-    .text('Top Viewed Properties');
+    doc.fontSize(16).text('Top Viewed Properties');
 
-  topViewed.forEach((property: any) => {
-    doc.text(
-      `• ${property.title}
+    topViewed.forEach((property: any) => {
+      doc.text(
+        `• ${property.title}
 City: ${property.city}
 Price: ${property.price}
 Views: ${property.views}
 Favorites: ${property.favoritesCount}`,
-    );
+      );
 
-    doc.moveDown();
-  });
+      doc.moveDown();
+    });
 
-  // =========================
-  // LATEST
-  // =========================
+    // =========================
+    // LATEST
+    // =========================
 
-  doc
-    .fontSize(16)
-    .text('Latest Properties');
+    doc.fontSize(16).text('Latest Properties');
 
-  latestProperties.forEach((property: any) => {
-    doc.text(
-      `• ${property.title}
+    latestProperties.forEach((property: any) => {
+      doc.text(
+        `• ${property.title}
 Owner: ${property.owner?.name}
 Status: ${property.status}
 Price: ${property.price}`,
-    );
+      );
 
-    doc.moveDown();
-  });
+      doc.moveDown();
+    });
 
-  doc.end();
-}
+    doc.end();
+  }
 }

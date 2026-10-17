@@ -6,10 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import {
-  Payment,
-  PaymentDocument,
-} from './schemas/payment.schema';
+import { Payment, PaymentDocument } from './schemas/payment.schema';
 
 import {
   Property,
@@ -41,39 +38,27 @@ export class PaymentsService {
     userId: string,
     file: Express.Multer.File,
   ) {
-    const property =
-      await this.propertyModel.findById(
-        dto.propertyId,
-      );
+    const property = await this.propertyModel.findById(dto.propertyId);
 
     if (!property) {
-      throw new NotFoundException(
-        'Property not found',
-      );
+      throw new NotFoundException('Property not found');
     }
 
     if (property.owner.toString() !== userId) {
-      throw new BadRequestException(
-        'Not allowed',
-      );
+      throw new BadRequestException('Not allowed');
     }
 
     if (property.status !== 'PendingPayment') {
-      throw new BadRequestException(
-        'This property is not waiting for payment',
-      );
+      throw new BadRequestException('This property is not waiting for payment');
     }
 
-    const existingPayment =
-      await this.paymentModel.findOne({
-        property: property._id,
-        status: 'Pending',
-      });
+    const existingPayment = await this.paymentModel.findOne({
+      property: property._id,
+      status: 'Pending',
+    });
 
     if (existingPayment) {
-      throw new BadRequestException(
-        'Payment already submitted',
-      );
+      throw new BadRequestException('Payment already submitted');
     }
 
     if (!file) {
@@ -82,13 +67,9 @@ export class PaymentsService {
       );
     }
 
-    const settings =
-      await this.platformSettingsService.getSettings();
+    const settings = await this.platformSettingsService.getSettings();
 
-    const upload: any =
-      await this.cloudinaryService.uploadImage(
-        file,
-      );
+    const upload: any = await this.cloudinaryService.uploadImage(file);
 
     let amount: number;
     if (property.listingType === 'Featured') {
@@ -99,41 +80,31 @@ export class PaymentsService {
       };
       amount =
         featuredPrices[
-          property.featuredDuration as
-            | 'week'
-            | 'twoWeeks'
-            | 'month'
+          property.featuredDuration as 'week' | 'twoWeeks' | 'month'
         ] ?? settings.featuredPriceWeek;
     } else {
       amount = settings.normalListingPrice;
     }
 
-    const payment =
-      await this.paymentModel.create({
-        user: new Types.ObjectId(userId),
+    const payment = await this.paymentModel.create({
+      user: new Types.ObjectId(userId),
 
-        property: property._id,
+      property: property._id,
 
-        amount,
+      amount,
 
-        paymentMethod: dto.paymentMethod,
+      paymentMethod: dto.paymentMethod,
 
-        receiptImage:
-          upload.secure_url,
+      receiptImage: upload.secure_url,
 
-        receiptPublicId:
-          upload.public_id,
+      receiptPublicId: upload.public_id,
 
-        status: 'Pending',
+      status: 'Pending',
 
-        isRenewal:
-          dto.isRenewal ?? false,
+      isRenewal: dto.isRenewal ?? false,
 
-        renewProperty:
-          dto.isRenewal
-            ? property._id
-            : undefined,
-      });
+      renewProperty: dto.isRenewal ? property._id : undefined,
+    });
 
     return payment;
   }
@@ -143,10 +114,7 @@ export class PaymentsService {
       .find({
         user: new Types.ObjectId(userId),
       })
-      .populate(
-        'property',
-        'title price city images status listingType',
-      )
+      .populate('property', 'title price city images status listingType')
       .sort({
         createdAt: -1,
       });
@@ -161,23 +129,14 @@ export class PaymentsService {
 
     return this.paymentModel
       .find(filter)
-      .populate(
-        'user',
-        'name email phone',
-      )
-      .populate(
-        'property',
-        'title city price status',
-      )
+      .populate('user', 'name email phone')
+      .populate('property', 'title city price status')
       .sort({
         createdAt: -1,
       });
   }
 
-  async getDashboardStats(
-    startDate?: Date,
-    endDate?: Date,
-  ) {
+  async getDashboardStats(startDate?: Date, endDate?: Date) {
     const dateFilter: any = {};
 
     if (startDate || endDate) {
@@ -216,178 +175,119 @@ export class PaymentsService {
     };
   }
 
-  async approve(
-  paymentId: string,
-  adminId: string,
-  reviewNote?: string,
-) {
-  const payment =
-    await this.paymentModel.findById(
-      paymentId,
+  async approve(paymentId: string, adminId: string, reviewNote?: string) {
+    const payment = await this.paymentModel.findById(paymentId);
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    if (payment.status !== 'Pending') {
+      throw new BadRequestException('Payment already reviewed');
+    }
+
+    payment.status = 'Approved';
+    payment.reviewedBy = new Types.ObjectId(adminId);
+    payment.reviewedAt = new Date();
+    payment.reviewNote = reviewNote ?? '';
+
+    await payment.save();
+
+    const property = await this.propertyModel.findById(payment.property);
+
+    if (!property) {
+      throw new NotFoundException('Property not found');
+    }
+
+    const settings = await this.platformSettingsService.getSettings();
+
+    if (payment.isRenewal) {
+      const expires =
+        property.expiresAt > new Date() ? property.expiresAt : new Date();
+
+      expires.setDate(expires.getDate() + settings.listingDurationDays);
+
+      property.expiresAt = expires;
+      property.status = 'Published';
+      property.expiryReminderSentAt = null;
+    } else {
+      property.status = 'Pending';
+    }
+
+    await property.save();
+
+    await this.notificationsService.createNotification(
+      payment.user.toString(),
+      'Payment Approved',
+      payment.isRenewal
+        ? 'Your renewal payment has been approved.'
+        : 'Your payment has been approved and your property is waiting for review.',
+      'PaymentApproved',
+      payment.property.toString(),
+      payment._id.toString(),
     );
-
-  if (!payment) {
-    throw new NotFoundException(
-      'Payment not found',
-    );
-  }
-
-  if (payment.status !== 'Pending') {
-    throw new BadRequestException(
-      'Payment already reviewed',
-    );
-  }
-
-  payment.status = 'Approved';
-  payment.reviewedBy =
-    new Types.ObjectId(adminId);
-  payment.reviewedAt = new Date();
-  payment.reviewNote =
-    reviewNote ?? '';
-
-  await payment.save();
-
-  const property =
-    await this.propertyModel.findById(
-      payment.property,
-    );
-
-  if (!property) {
-    throw new NotFoundException(
-      'Property not found',
-    );
-  }
-
-  const settings =
-    await this.platformSettingsService.getSettings();
-
-  if (payment.isRenewal) {
-    const expires =
-      property.expiresAt > new Date()
-        ? property.expiresAt
-        : new Date();
-
-    expires.setDate(
-      expires.getDate() +
-        settings.listingDurationDays,
-    );
-
-    property.expiresAt = expires;
-    property.status = 'Published';
-    property.expiryReminderSentAt =
-      null;
-  } else {
-    property.status = 'Pending';
-  }
-
-  await property.save();
-
-  await this.notificationsService.createNotification(
-    payment.user.toString(),
-    'Payment Approved',
-    payment.isRenewal
-      ? 'Your renewal payment has been approved.'
-      : 'Your payment has been approved and your property is waiting for review.',
-    'PaymentApproved',
-    payment.property.toString(),
-    payment._id.toString(),
-  );
-
-  return {
-    message:
-      'Payment approved successfully',
-  };
-}
-
-async reject(
-  paymentId: string,
-  adminId: string,
-  reviewNote?: string,
-) {
-  const payment =
-    await this.paymentModel.findById(
-      paymentId,
-    );
-
-  if (!payment) {
-    throw new NotFoundException(
-      'Payment not found',
-    );
-  }
-
-  if (payment.status !== 'Pending') {
-    throw new BadRequestException(
-      'Payment already reviewed',
-    );
-  }
-
-  payment.status = 'Rejected';
-  payment.reviewedBy =
-    new Types.ObjectId(adminId);
-  payment.reviewedAt = new Date();
-  payment.reviewNote =
-    reviewNote ?? '';
-
-  await payment.save();
-
-  if (payment.isRenewal) {
-    await this.propertyModel.findByIdAndUpdate(
-      payment.property,
-      {
-        status: 'Published',
-      },
-    );
-  } else {
-    await this.propertyModel.findByIdAndUpdate(
-      payment.property,
-      {
-        status: 'PendingPayment',
-      },
-    );
-  }
-
-  await this.notificationsService.createNotification(
-    payment.user.toString(),
-    'Payment Rejected',
-    reviewNote ||
-      'Your payment has been rejected.',
-    'PaymentRejected',
-    payment.property.toString(),
-    payment._id.toString(),
-  );
-
-  await this.cloudinaryService.deleteImage(
-    payment.receiptPublicId,
-  );
-
-  return {
-    message:
-      'Payment rejected successfully',
-  };
-}
-  async getPaymentMethods() {
-    const settings =
-      await this.platformSettingsService.getSettings();
 
     return {
-      normalListingPrice:
-        settings.normalListingPrice,
-      featuredPriceWeek:
-        settings.featuredPriceWeek,
-      featuredPriceTwoWeeks:
-        settings.featuredPriceTwoWeeks,
-      featuredPriceMonth:
-        settings.featuredPriceMonth,
-      listingDurationDays:
-        settings.listingDurationDays,
-      paymentMethods:
-        settings.paymentMethods,
-      supportPhone:
-        settings.supportPhone,
-      supportEmail:
-        settings.supportEmail,
-      maxImagesPerProperty:
-        settings.maxImagesPerProperty,
+      message: 'Payment approved successfully',
+    };
+  }
+
+  async reject(paymentId: string, adminId: string, reviewNote?: string) {
+    const payment = await this.paymentModel.findById(paymentId);
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    if (payment.status !== 'Pending') {
+      throw new BadRequestException('Payment already reviewed');
+    }
+
+    payment.status = 'Rejected';
+    payment.reviewedBy = new Types.ObjectId(adminId);
+    payment.reviewedAt = new Date();
+    payment.reviewNote = reviewNote ?? '';
+
+    await payment.save();
+
+    if (payment.isRenewal) {
+      await this.propertyModel.findByIdAndUpdate(payment.property, {
+        status: 'Published',
+      });
+    } else {
+      await this.propertyModel.findByIdAndUpdate(payment.property, {
+        status: 'PendingPayment',
+      });
+    }
+
+    await this.notificationsService.createNotification(
+      payment.user.toString(),
+      'Payment Rejected',
+      reviewNote || 'Your payment has been rejected.',
+      'PaymentRejected',
+      payment.property.toString(),
+      payment._id.toString(),
+    );
+
+    await this.cloudinaryService.deleteImage(payment.receiptPublicId);
+
+    return {
+      message: 'Payment rejected successfully',
+    };
+  }
+  async getPaymentMethods() {
+    const settings = await this.platformSettingsService.getSettings();
+
+    return {
+      normalListingPrice: settings.normalListingPrice,
+      featuredPriceWeek: settings.featuredPriceWeek,
+      featuredPriceTwoWeeks: settings.featuredPriceTwoWeeks,
+      featuredPriceMonth: settings.featuredPriceMonth,
+      listingDurationDays: settings.listingDurationDays,
+      paymentMethods: settings.paymentMethods,
+      supportPhone: settings.supportPhone,
+      supportEmail: settings.supportEmail,
+      maxImagesPerProperty: settings.maxImagesPerProperty,
     };
   }
 

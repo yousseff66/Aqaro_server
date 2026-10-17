@@ -19,61 +19,32 @@ type AuthenticatedRequest = ExpressRequest & {
 };
 
 @Controller('notifications')
-@UseGuards(
-  JwtAuthGuard,
-  RolesGuard,
-)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationsController {
-  constructor(
-    private readonly notificationsService: NotificationsService,
-  ) {}
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
-  getMyNotifications(
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.notificationsService.getMyNotifications(
-      req.user.userId,
-    );
+  getMyNotifications(@Req() req: AuthenticatedRequest) {
+    return this.notificationsService.getMyNotifications(req.user.userId);
   }
 
   @Get('unread-count')
-  getUnreadCount(
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.notificationsService.getUnreadCount(
-      req.user.userId,
-    );
+  getUnreadCount(@Req() req: AuthenticatedRequest) {
+    return this.notificationsService.getUnreadCount(req.user.userId);
   }
 
   @Patch(':id/read')
-  markAsRead(
-    @Param('id') id: string,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.notificationsService.markAsRead(
-      id,
-      req.user.userId,
-    );
+  markAsRead(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.notificationsService.markAsRead(id, req.user.userId);
   }
 
   @Patch('read-all')
-  markAllAsRead(
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.notificationsService.markAllAsRead(
-      req.user.userId,
-    );
+  markAllAsRead(@Req() req: AuthenticatedRequest) {
+    return this.notificationsService.markAllAsRead(req.user.userId);
   }
 
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.notificationsService.remove(
-      id,
-      req.user.userId,
-    );
+  remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.notificationsService.remove(id, req.user.userId);
   }
 }

@@ -31,9 +31,7 @@ type AuthenticatedRequest = ExpressRequest & {
 @Controller('payments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PaymentsController {
-  constructor(
-    private readonly paymentsService: PaymentsService,
-  ) {}
+  constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('receipt'))
@@ -42,28 +40,18 @@ export class PaymentsController {
     @Req() req: AuthenticatedRequest,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.paymentsService.create(
-      dto,
-      req.user.userId,
-      file,
-    );
+    return this.paymentsService.create(dto, req.user.userId, file);
   }
 
   @Get('my')
   myPayments(@Req() req: AuthenticatedRequest) {
-    return this.paymentsService.myPayments(
-      req.user.userId,
-    );
+    return this.paymentsService.myPayments(req.user.userId);
   }
 
   @Get('admin')
   @Roles('Admin')
-  adminPayments(
-    @Query('status') status?: string,
-  ) {
-    return this.paymentsService.adminPayments(
-      status,
-    );
+  adminPayments(@Query('status') status?: string) {
+    return this.paymentsService.adminPayments(status);
   }
 
   @Patch(':id/approve')
@@ -73,11 +61,7 @@ export class PaymentsController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: UpdatePaymentStatusDto,
   ) {
-    return this.paymentsService.approve(
-      id,
-      req.user.userId,
-      dto.reviewNote,
-    );
+    return this.paymentsService.approve(id, req.user.userId, dto.reviewNote);
   }
 
   @Patch(':id/reject')
@@ -87,11 +71,7 @@ export class PaymentsController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: UpdatePaymentStatusDto,
   ) {
-    return this.paymentsService.reject(
-      id,
-      req.user.userId,
-      dto.reviewNote,
-    );
+    return this.paymentsService.reject(id, req.user.userId, dto.reviewNote);
   }
 
   @Get('methods')

@@ -30,11 +30,7 @@ export class Payment {
   amount: number;
 
   @Prop({
-    enum: [
-      'InstaPay',
-      'VodafoneCash',
-      'Visa',
-    ],
+    enum: ['InstaPay', 'VodafoneCash', 'Visa'],
     required: true,
   })
   paymentMethod: string;
@@ -50,11 +46,7 @@ export class Payment {
   receiptPublicId: string;
 
   @Prop({
-    enum: [
-      'Pending',
-      'Approved',
-      'Rejected',
-    ],
+    enum: ['Pending', 'Approved', 'Rejected'],
     default: 'Pending',
   })
   status: string;
@@ -74,21 +66,20 @@ export class Payment {
   reviewedAt?: Date;
 
   @Prop({
-  default: false,
-})
-isRenewal: boolean;
+    default: false,
+  })
+  isRenewal: boolean;
 
-@Prop({
-  type: Types.ObjectId,
-  ref: Property.name,
-})
-renewProperty?: Types.ObjectId;
+  @Prop({
+    type: Types.ObjectId,
+    ref: Property.name,
+  })
+  renewProperty?: Types.ObjectId;
 }
 
-export const PaymentSchema =
-  SchemaFactory.createForClass(Payment);
+export const PaymentSchema = SchemaFactory.createForClass(Payment);
 
-  PaymentSchema.index({
+PaymentSchema.index({
   user: 1,
 });
 

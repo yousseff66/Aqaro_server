@@ -76,7 +76,7 @@ export class PushNotificationService implements OnModuleInit {
         notification: {
           sound: 'default',
           // تغيير 'default' لـ 'high_importance_channel' ليطابق كود الفلاتر
-          channelId: 'high_importance_channel', 
+          channelId: 'high_importance_channel',
           clickAction: 'FLUTTER_NOTIFICATION_CLICK',
         },
       },
@@ -100,7 +100,9 @@ export class PushNotificationService implements OnModuleInit {
           ) {
             deadTokens.push(validTokens[index]);
           }
-          this.logger.error(`Token Error [${validTokens[index].slice(0, 10)}...]: ${code}`);
+          this.logger.error(
+            `Token Error [${validTokens[index].slice(0, 10)}...]: ${code}`,
+          );
         }
       });
 

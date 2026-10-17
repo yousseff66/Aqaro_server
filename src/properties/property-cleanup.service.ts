@@ -3,10 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import {
-  Property,
-  PropertyDocument,
-} from './schemas/property.schema';
+import { Property, PropertyDocument } from './schemas/property.schema';
 
 import {
   Favorite,
@@ -18,9 +15,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PropertyCleanupService {
-  private readonly logger = new Logger(
-    PropertyCleanupService.name,
-  );
+  private readonly logger = new Logger(PropertyCleanupService.name);
 
   constructor(
     @InjectModel(Property.name)
@@ -38,9 +33,7 @@ export class PropertyCleanupService {
     const today = new Date();
 
     const after3Days = new Date();
-    after3Days.setDate(
-      today.getDate() + 3,
-    );
+    after3Days.setDate(today.getDate() + 3);
 
     const start = new Date(after3Days);
     start.setHours(0, 0, 0, 0);
@@ -48,15 +41,14 @@ export class PropertyCleanupService {
     const end = new Date(after3Days);
     end.setHours(23, 59, 59, 999);
 
-    const properties =
-      await this.propertyModel.find({
-        status: 'Published',
-        expiresAt: {
-          $gte: start,
-          $lte: end,
-        },
-        expiryReminderSentAt: null,
-      });
+    const properties = await this.propertyModel.find({
+      status: 'Published',
+      expiresAt: {
+        $gte: start,
+        $lte: end,
+      },
+      expiryReminderSentAt: null,
+    });
 
     for (const property of properties) {
       await this.notificationsService.createNotification(
@@ -67,8 +59,7 @@ export class PropertyCleanupService {
         property._id.toString(),
       );
 
-      property.expiryReminderSentAt =
-        new Date();
+      property.expiryReminderSentAt = new Date();
 
       await property.save();
     }
@@ -114,13 +105,12 @@ export class PropertyCleanupService {
 
   @Cron('0 0 * * *')
   async deleteExpiredProperties() {
-    const expiredProperties =
-      await this.propertyModel.find({
-        status: 'Published',
-        expiresAt: {
-          $lte: new Date(),
-        },
-      });
+    const expiredProperties = await this.propertyModel.find({
+      status: 'Published',
+      expiresAt: {
+        $lte: new Date(),
+      },
+    });
 
     if (!expiredProperties.length) {
       return;
@@ -128,9 +118,7 @@ export class PropertyCleanupService {
 
     for (const property of expiredProperties) {
       try {
-        this.logger.log(
-          `Deleting property ${property._id}`,
-        );
+        this.logger.log(`Deleting property ${property._id}`);
 
         property.status = 'Deleting';
 
@@ -144,35 +132,23 @@ export class PropertyCleanupService {
           property._id.toString(),
         );
 
-        this.logger.log(
-          `Deleting ${property.imagePublicIds.length} images`,
-        );
+        this.logger.log(`Deleting ${property.imagePublicIds.length} images`);
 
         for (const publicId of property.imagePublicIds) {
-          await this.cloudinaryService.deleteImage(
-            publicId,
-          );
+          await this.cloudinaryService.deleteImage(publicId);
         }
 
-        this.logger.log(
-          'Deleting favorites',
-        );
+        this.logger.log('Deleting favorites');
 
         await this.favoriteModel.deleteMany({
           property: property._id,
         });
 
-        this.logger.log(
-          'Deleting property document',
-        );
+        this.logger.log('Deleting property document');
 
-        await this.propertyModel.findByIdAndDelete(
-          property._id,
-        );
+        await this.propertyModel.findByIdAndDelete(property._id);
 
-        this.logger.log(
-          `Property ${property._id} deleted successfully`,
-        );
+        this.logger.log(`Property ${property._id} deleted successfully`);
       } catch (error: any) {
         this.logger.error(
           `Failed to delete property ${property._id}`,

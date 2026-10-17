@@ -57,12 +57,6 @@ export class GetPropertiesDto {
   featured?: string;
 
   @IsOptional()
-  @IsEnum([
-    'Pending',
-    'Published',
-    'Rented',
-    'Rejected',
-    'Expired',
-  ])
+  @IsEnum(['Pending', 'Published', 'Rented', 'Rejected', 'Expired'])
   status?: string;
 }

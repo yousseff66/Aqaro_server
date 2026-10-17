@@ -1,17 +1,7 @@
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdatePropertyStatusDto {
-  @IsEnum([
-    'Pending',
-    'Published',
-    'Rejected',
-    'Rented',
-    'Expired',
-  ])
+  @IsEnum(['Pending', 'Published', 'Rejected', 'Rented', 'Expired'])
   status!: string;
 
   @IsOptional()

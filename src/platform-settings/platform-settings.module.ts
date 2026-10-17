@@ -18,11 +18,7 @@ import { PlatformSettingsService } from './platform-settings.service';
       },
     ]),
   ],
-  providers: [
-    PlatformSettingsService,
-  ],
-  exports: [
-    PlatformSettingsService,
-  ],
+  providers: [PlatformSettingsService],
+  exports: [PlatformSettingsService],
 })
 export class PlatformSettingsModule {}

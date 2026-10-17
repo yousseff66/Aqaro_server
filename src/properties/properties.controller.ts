@@ -11,10 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import {
-  UseInterceptors,
-  UploadedFiles,
-} from '@nestjs/common';
+import { UseInterceptors, UploadedFiles } from '@nestjs/common';
 import {
   ParseFilePipe,
   MaxFileSizeValidator,
@@ -45,32 +42,33 @@ export class PropertiesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-  FilesInterceptor('images', 10, {
-    storage: memoryStorage(),
-    limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
-    },
-  }),
-)
+    FilesInterceptor('images', 10, {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
   create(
     @Body() createPropertyDto: CreatePropertyDto,
     @Request() req: AuthenticatedRequest,
     @UploadedFiles(
-  new ParseFilePipe({
-    validators: [
-      new MaxFileSizeValidator({
-        maxSize: 5 * 1024 * 1024, // 5 MB
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 5 * 1024 * 1024, // 5 MB
+          }),
+          new FileTypeValidator({
+            fileType: /(jpg|jpeg|png|webp)$/i,
+          }),
+        ],
+        fileIsRequired: false,
       }),
-      new FileTypeValidator({
-        fileType: /(jpg|jpeg|png|webp)$/i,
-      }),
-    ],
-    fileIsRequired: false,
-  }),
-)
-files: Express.Multer.File[],
+    )
+    files: Express.Multer.File[],
   ) {
-    return this.propertiesService.create(createPropertyDto,
+    return this.propertiesService.create(
+      createPropertyDto,
       req.user.userId,
       files,
     );
@@ -81,36 +79,27 @@ files: Express.Multer.File[],
     return this.propertiesService.findAll(query);
   }
   @Get('my')
-@UseGuards(JwtAuthGuard)
-findMyProperties(
-  @Request() req: AuthenticatedRequest,
-  @Query() query: GetPropertiesDto,
-) {
-  return this.propertiesService.findMyProperties(
-    req.user.userId,
-    query,
-  );
-}
-@Get('my/stats')
-@UseGuards(JwtAuthGuard)
-getMyStats(
-  @Request() req: AuthenticatedRequest,
-) {
-  return this.propertiesService.getMyStats(
-    req.user.userId,
-  );
-}
+  @UseGuards(JwtAuthGuard)
+  findMyProperties(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: GetPropertiesDto,
+  ) {
+    return this.propertiesService.findMyProperties(req.user.userId, query);
+  }
+  @Get('my/stats')
+  @UseGuards(JwtAuthGuard)
+  getMyStats(@Request() req: AuthenticatedRequest) {
+    return this.propertiesService.getMyStats(req.user.userId);
+  }
 
-@Get('nearby')
-findNearby(
-  @Query() query: NearbyPropertiesDto,
-) {
-  return this.propertiesService.findNearby(
-    query.lat,
-    query.lng,
-    query.radius,
-  );
-}
+  @Get('nearby')
+  findNearby(@Query() query: NearbyPropertiesDto) {
+    return this.propertiesService.findNearby(
+      query.lat,
+      query.lng,
+      query.radius,
+    );
+  }
 
   @Get(':id')
   findOne(@Param('id', ObjectIdValidationPipe) id: string) {
@@ -132,49 +121,47 @@ findNearby(
   }
 
   @Patch(':id/images')
-@UseGuards(JwtAuthGuard)
-@UseInterceptors(
-  FilesInterceptor('images', 10, {
-    storage: memoryStorage(),
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-    },
-  }),
-)
-updateImages(
-  @Param('id', ObjectIdValidationPipe)
-  id: string,
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FilesInterceptor('images', 10, {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    }),
+  )
+  updateImages(
+    @Param('id', ObjectIdValidationPipe)
+    id: string,
 
-  @Body('removedImages')
-  removedImages: string,
+    @Body('removedImages')
+    removedImages: string,
 
-  @UploadedFiles(
-  new ParseFilePipe({
-    validators: [
-      new MaxFileSizeValidator({
-        maxSize: 5 * 1024 * 1024,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 5 * 1024 * 1024,
+          }),
+          new FileTypeValidator({
+            fileType: /(jpg|jpeg|png|webp)$/i,
+          }),
+        ],
+        fileIsRequired: false,
       }),
-      new FileTypeValidator({
-        fileType: /(jpg|jpeg|png|webp)$/i,
-      }),
-    ],
-    fileIsRequired: false,
-  }),
-)
-files: Express.Multer.File[],
+    )
+    files: Express.Multer.File[],
 
-  @Request()
-  req: AuthenticatedRequest,
-) {
-  return this.propertiesService.updateImages(
-    id,
-    req.user.userId,
-    files,
-    removedImages
-      ? JSON.parse(removedImages)
-      : [],
-  );
-}
+    @Request()
+    req: AuthenticatedRequest,
+  ) {
+    return this.propertiesService.updateImages(
+      id,
+      req.user.userId,
+      files,
+      removedImages ? JSON.parse(removedImages) : [],
+    );
+  }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

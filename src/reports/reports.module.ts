@@ -1,20 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {
-  Report,
-  ReportSchema,
-} from './schemas/report.schema';
+import { Report, ReportSchema } from './schemas/report.schema';
 
 import {
   Property,
   PropertySchema,
 } from '../properties/schemas/property.schema';
 
-import {
-  User,
-  UserSchema,
-} from '../users/schemas/user.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
@@ -41,16 +35,10 @@ import { PropertiesModule } from '../properties/properties.module';
     PropertiesModule,
   ],
 
-  controllers: [
-    ReportsController,
-  ],
+  controllers: [ReportsController],
 
-  providers: [
-    ReportsService,
-  ],
+  providers: [ReportsService],
 
-  exports: [
-    ReportsService,
-  ],
+  exports: [ReportsService],
 })
 export class ReportsModule {}
